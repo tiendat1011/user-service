@@ -3,16 +3,25 @@ package dev.proj.userservice.service;
 import dev.proj.userservice.dto.ResponseInfo;
 import dev.proj.userservice.dto.UserRequest;
 import dev.proj.userservice.dto.UserResponse;
+import dev.proj.userservice.model.Role;
+import dev.proj.userservice.model.RoleName;
 import dev.proj.userservice.model.User;
+import dev.proj.userservice.repository.RoleRepository;
 import dev.proj.userservice.repository.UserRepository;
 import dev.proj.userservice.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserRequest userRequest) {
@@ -31,9 +40,17 @@ public class UserServiceImpl implements UserService {
                 .firstName(userRequest.getFirstName())
                 .lastName(userRequest.getLastName())
                 .email(userRequest.getEmail())
-                .userPassword(userRequest.getPassword())
+                .password(passwordEncoder.encode(userRequest.getPassword()))
                 .phoneNumber(userRequest.getPhone())
                 .build();
+
+        Set<Role> roles = new HashSet<>();
+        userRequest.getRoles().forEach(roleName -> {
+            Role role = roleRepository.findByRole(RoleName.valueOf(roleName))
+                    .orElseThrow(() -> new RuntimeException(String.format("Role %s not found", roleName)));
+            roles.add(role);
+        });
+        savedUser.setRole(roles);
         userRepository.save(savedUser);
 
         return UserResponse.builder()
@@ -43,5 +60,10 @@ public class UserServiceImpl implements UserService {
                         .build())
                 .token(null)
                 .build();
+    }
+
+    @Override
+    public UserResponse login(UserRequest userRequest) {
+        return null;
     }
 }

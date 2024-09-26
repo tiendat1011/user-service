@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -29,4 +31,6 @@ public class UserRequest {
 
     @NotBlank(message = "Phone number cannot be empty")
     private String phone;
+
+    private List<String> roles;
 }

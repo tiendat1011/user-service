@@ -5,4 +5,5 @@ import dev.proj.userservice.dto.UserResponse;
 
 public interface UserService {
     UserResponse createUser(UserRequest userRequest);
+    UserResponse login(UserRequest userRequest);
 }
